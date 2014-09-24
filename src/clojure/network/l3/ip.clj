@@ -12,7 +12,7 @@
   ([x] x)
   ([x y] (num2ip (.add (biginteger x) (biginteger y))))
   ([x y & more]
-   (reduce #(.add (biginteger %1) (biginteger %2)) (.add (biginteger x) (biginteger y)) more)))
+   (num2ip (reduce #(.add %1 (biginteger %2)) (.add (biginteger x) (biginteger y)) more))))
 
 (defn inc
   [x]
@@ -27,7 +27,7 @@
   ([x] x)
   ([x y] (num2ip (.subtract (biginteger x) (biginteger y))))
   ([x y & more]
-   (num2ip (reduce #(.subtract (biginteger %1) (biginteger %2)) (.subtract (biginteger x) (biginteger y)) more))))
+   (num2ip (reduce #(.subtract %1 (biginteger %2)) (.subtract (biginteger x) (biginteger y)) more))))
 
 (defmethod print-method clojure.network.l3.ip.Network [n ^java.io.Writer w]
   (.write w (apply str "Network: " (str n))))
