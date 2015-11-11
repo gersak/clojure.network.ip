@@ -1,6 +1,6 @@
 (ns clojure.network-test
   (:use clojure.test
-        clojure.network))
+        clojure.network.l3.ip))
 
 (deftest a-test
   (testing "FIXME, I fail."

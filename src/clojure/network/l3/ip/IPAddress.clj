@@ -1,4 +1,4 @@
-(ns clojure.network.l3.ip.IPAddress 
+(ns clojure.network.l3.ip.IPAddress
   (:require [clojure.math.numeric-tower :as math])
   (:import [java.math.BigInteger]
            [java.net InetAddress Inet4Address Inet6Address])
@@ -50,7 +50,7 @@
 
 (extend-type String
   IPConstructor
-  (ip-init [this] 
+  (ip-init [this]
     (let [ip (InetAddress/getByName this)]
       [[(.getAddress ip)] ip])))
 

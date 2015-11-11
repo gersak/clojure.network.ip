@@ -1,7 +1,7 @@
 (ns clojure.network.l3.ip.Network
   (:require [clojure.network.l3.ip.IPAddress :refer [normalize-ip-bytes]])
   (:import [java.net InetAddress Inet4Address Inet6Address]
-           [clojure.network.l3.ip IPAddress] 
+           [clojure.network.l3.ip IPAddress]
            [java.lang UnsupportedOperationException IndexOutOfBoundsException])
   (:gen-class :init init
               :prefix network-
@@ -21,7 +21,7 @@
         test! (map #(bit-test x %) testers)
         subnet-bits (count (take-while true? test!))
         all-bits (count (filter true? test!))]
-    (if (not= subnet-bits all-bits) 
+    (if (not= subnet-bits all-bits)
       (throw (Exception. (str "Subnet part: " x " is not valid subnet!")))
       subnet-bits)))
 
@@ -29,7 +29,7 @@
 
 (defmethod get-network-address java.net.Inet4Address [ip-address subnet]
   (let [mark (get-mark (.toByteArray ip-address) subnet)
-        network-address-bytes (-> 
+        network-address-bytes (->
                                 (.shiftRight ip-address mark)
                                 (.shiftLeft mark)
                                 (.toByteArray)
@@ -38,7 +38,7 @@
 
 (defmethod get-network-address java.net.Inet6Address [ip-address subnet]
   (let [mark (get-mark (.toByteArray ip-address) subnet)
-        network-address-bytes (-> 
+        network-address-bytes (->
                                 (.shiftRight ip-address mark)
                                 (.shiftLeft mark)
                                 (.toByteArray)
@@ -47,15 +47,15 @@
 
 (def ^:private IPv4_MAX_ADDRESS
   (IPAddress.
-    (normalize-ip-bytes 
-      (.toByteArray 
+    (normalize-ip-bytes
+      (.toByteArray
         (BigInteger/valueOf (dec (clojure.math.numeric-tower/expt 2 32)))) 4)))
 
 
 (def ^:private IPv6_MAX_ADDRESS
   (IPAddress.
-    (normalize-ip-bytes 
-      (.toByteArray 
+    (normalize-ip-bytes
+      (.toByteArray
         (biginteger (dec (clojure.math.numeric-tower/expt 2 128)))) 16)))
 
 (defmulti get-max-address (fn [ip subnet] (class (.state ip))))
@@ -65,14 +65,14 @@
         mask (BigInteger/valueOf (dec (bit-shift-left 1 mark)))
         diff-seq (.toByteArray (.or mask ip-address))]
     (if (= (list (byte -1)) (seq diff-seq))
-      IPv4_MAX_ADDRESS 
+      IPv4_MAX_ADDRESS
       (IPAddress. (normalize-ip-bytes diff-seq 4)))))
 
 (defmethod get-max-address java.net.Inet6Address [ip-address subnet]
   (let [mark (get-mark (.toByteArray ip-address) subnet)
         mask (BigInteger/valueOf (dec (bit-shift-left 1 mark)))
         diff-seq (.toByteArray (.or mask ip-address))]
-    (if (= (list (byte -1)) (seq diff-seq)) 
+    (if (= (list (byte -1)) (seq diff-seq))
       IPv6_MAX_ADDRESS
       (IPAddress. (normalize-ip-bytes diff-seq 16)))))
 
@@ -81,13 +81,13 @@
     (when (and (>= x min-address) (< x max-address))
       (IPAddress. (.toByteArray (biginteger (.add x BigInteger/ONE)))))))
 
-(defn network-init 
+(defn network-init
   ([network]
    (assert (string? network) "Argument not of String type...")
    (let [[ip subnet] (clojure.string/split network #"/")
          subnet (Integer. subnet)
          ip (IPAddress. ip)]
-     [[] {:ip ip 
+     [[] {:ip ip
           :subnet subnet}]))
   ([ip-address subnet]
    (if (string? subnet)
@@ -96,14 +96,14 @@
        (let [subnet (if (string? subnet)
                       (reduce clojure.core/+ (map subnet-count (map read-string (clojure.string/split subnet #"\."))))
                       subnet)]
-         [[] {:ip (IPAddress. ip-address) 
+         [[] {:ip (IPAddress. ip-address)
               :subnet subnet}]))
      (do
        (let [ip (IPAddress. ip-address)]
          (if (instance? Inet4Address (.state ip))
            (assert (and (<= subnet 32) (> subnet 0)) (str "Subnet: " subnet " is not valid!"))
-           (assert (and (<= subnet 128) (> subnet 0)) (str "Subnet: " subnet " is not valid!"))) 
-         [[] {:ip (IPAddress. ip-address) 
+           (assert (and (<= subnet 128) (> subnet 0)) (str "Subnet: " subnet " is not valid!")))
+         [[] {:ip (IPAddress. ip-address)
               :subnet subnet}])))))
 
 (defn network-toString [this]
@@ -116,13 +116,13 @@
 
 ;; ISeq
 (defn network-seq [this]
-  (when-let [[min-address max-address] (address-range this)] 
+  (when-let [[min-address max-address] (address-range this)]
     (lazy-seq (take-while (comp not nil?) (iterate (next-address-iterator min-address max-address) min-address)))))
 
 (defn network-ipAddress [this]
   (:ip (.state this)))
 
-;; IPersistentCollection 
+;; IPersistentCollection
 (defn network-count [this]
   (when-let [[min-address max-address] (address-range this)]
     (let [r (inc (biginteger (- max-address min-address)))
@@ -152,13 +152,13 @@
 (defn network-disjoin [this key] (throw (UnsupportedOperationException. "Addresses cannot be disjoined from network!")))
 
 (defn network-contains [this address]
-  (let [address (cond 
+  (let [address (cond
                   (string? address) (IPAddress. address)
                   (instance? IPAddress address) address)
         [min-address max-address] (address-range this)]
     (and (<= min-address address) (>= max-address address))))
 
-(defn network-get [this #^Integer address-number] 
+(defn network-get [this #^Integer address-number]
   (let [target-address (IPAddress. (.toByteArray (.add (biginteger (first this)) (biginteger address-number))))]
     (if (network-contains this target-address)
       target-address
