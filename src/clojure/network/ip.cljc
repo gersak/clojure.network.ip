@@ -46,8 +46,8 @@
   IPConstructor
   (make-ip-address [this] this)
   #?@(:clj [clojure.lang.IHashEq
-            hasheq [this] (numeric-value this)]
-     :cljs [IEquiv
+            (hasheq [this] (numeric-value this))]
+      :cljs [IEquiv
             (-equiv [this other]
                     (= (numeric-value this) (numeric-value other)))])
   Object
@@ -56,7 +56,6 @@
   (toString [this]
     #?(:clj (.getHostAddress (InetAddress/getByAddress value))
        :cljs (.toString (bits->ip value)))))
-
 
 
 #?(:clj
@@ -137,9 +136,6 @@
     (map make-ip-address (range min-address max-address))))
 
 
-(def test-ipv6 "2a00:c31:1ffe:fff::9:13")
-(def test-ipv4 "192.168.250.111")
-
 (deftype Network [ip mask]
   IPInfo
   (ip-address [_] ip)
@@ -160,23 +156,22 @@
                  ;; count coerces return value to long.
                  ;; Point is no more thant 2^32 can be counted
                  ;; BIG FAIL for... clojure
-                 #?(:clj (inc (.subtract max-value min-value)))))
+                 (inc (.subtract max-value min-value))))
         clojure.lang.Seqable
         (seq [this] (get-all-addresses ip mask))
         clojure.lang.IPersistentSet
-        (disjoin [this _] #?(:clj (throw (Exception. "Network can't disjoin IP Addresses."))))
+        (disjoin [this _] (throw (Exception. "Network can't disjoin IP Addresses.")))
         (contains [this ip]
                   (let [value (-> ip make-ip-address numeric-value)]
                     (and (<= value (numeric-value (get-broadcast-address ip mask))) (>= value (numeric-value (get-network-address ip mask))))))
         (get [this address-number]
-             #?(:clj
-                 (let [target-address (make-ip-address
-                                        (.add
-                                          (numeric-value (get-network-address ip mask))
-                                          (biginteger address-number)))]
-                   (if (.contains this target-address)
-                     target-address
-                     (throw (IndexOutOfBoundsException. (str "IP address: " target-address " is not in network " this)))))))
+             (let [target-address (make-ip-address
+                                    (.add
+                                      (numeric-value (get-network-address ip mask))
+                                      (biginteger address-number)))]
+               (if (.contains this target-address)
+                 target-address
+                 (throw (IndexOutOfBoundsException. (str "IP address: " target-address " is not in network " this))))))
         clojure.lang.Indexed
         (nth [this seq-number] (nth this seq-number nil))
         (nth [this seq-number not-found]
@@ -188,7 +183,9 @@
                    nth-address (+ network-address seq-number)]
                (if (<= nth-address max-address)
                  (make-ip-address nth-address)
-                 not-found)))]
+                 not-found)))
+        clojure.lang.IPersistentCollection
+        (equiv [this other] (and (= (first this) (first other)) (= (.mask this) (.mask other))))]
        :cljs
        [cljs.core/ISeq
         (-first [this] (get-network-address ip mask))
@@ -202,10 +199,12 @@
                  (let [value (-> target-ip make-ip-address)
                        max-address (get-broadcast-address ip mask)
                        min-address (get-network-address ip mask)]
-                   (println (str value) (str max-address) (str min-address))
                    (if (and (<= (numeric-value value) (numeric-value max-address)) (>= (numeric-value value) (numeric-value min-address)))
                      value
                      default-val)))
+        IEquiv
+        (-equiv [this other]
+                (and (= (first this) (first other)) (= (.-mask this) (.-mask other))))
         clojure.core/IIndexed
         (-nth [this seq-numb] (-nth this seq-numb nil))
         (-nth [this seq-numb not-found]
@@ -219,6 +218,7 @@
                   (make-ip-address nth-address)
                   not-found)))])
       Object
+      (equals [this other] (and (= (first this) (first other)) (= (.mask this) (.mask other))))
       (toString [this] (str ip "/" mask)))
 
 
@@ -237,7 +237,6 @@
                                                            :cljs
                                                            (try (js/parseInt subnet) (catch js/Error e nil)))]
                                        (do
-                                         (println subnet)
                                          (assert (and (<= subnet 32) (>= subnet 0)) (str "Subnet " subnet " is out of range."))
                                          (->Network ip-address subnet)))
                                      (do
@@ -320,7 +319,6 @@
     (let [new-network (make-network ip new-mask)
           delta (count new-network)
           offset (get-position (seq new-network) ip)]
-    (println offset)
       (map #(make-network (make-ip-address (+ offset (* % delta) (numeric-value network-address))) new-mask) (range parts)))))
 
 
