@@ -7,7 +7,6 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/google-closure-library "0.0-20151016-61277aea"]
                  [org.clojure/clojurescript "1.7.122"]]
   :cljsbuild {
               :builds [{:id "network"
