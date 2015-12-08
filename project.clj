@@ -1,4 +1,4 @@
-(defproject clojure.network "0.1.0-beta5"
+(defproject kovacnica/clojure.network "0.1.0"
   :description "FIXME: write description"
   :target-path "target/%s/"
   :compile-path "%s/classy-files"

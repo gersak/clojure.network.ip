@@ -1,6 +1,6 @@
 (ns clojure.network.ip
   #?(:clj
-      (:refer-clojure :exclude [first more cons]))
+      (:refer-clojure :exclude [more cons]))
   #?(:clj
       (:import
         [java.math.BigInteger]
@@ -185,7 +185,9 @@
                  (make-ip-address nth-address)
                  not-found)))
         clojure.lang.IPersistentCollection
-        (equiv [this other] (and (= (first this) (first other)) (= (.mask this) (.mask other))))]
+        (equiv [this other] (and
+                              (= (clojure.core/first this) (clojure.core/first other))
+                              (= (network-mask this) (network-mask other))))]
        :cljs
        [cljs.core/ISeq
         (-first [this] (get-network-address ip mask))
@@ -204,7 +206,9 @@
                      default-val)))
         IEquiv
         (-equiv [this other]
-                (and (= (first this) (first other)) (= (.-mask this) (.-mask other))))
+                (and
+                  (= (first this) (first other))li
+                  (= (network-mask this) (network-mask other))))
         clojure.core/IIndexed
         (-nth [this seq-numb] (-nth this seq-numb nil))
         (-nth [this seq-numb not-found]
