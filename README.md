@@ -166,6 +166,7 @@ user=> (contains? (make-network "192.168.100.110/28") "192.168.100.101")
 true
 
 ;; You can easily filter or remove addresses of target subnet
+
 user=> (filter (partial contains? (make-network "192.168.100.110/28")) (seq n1))
 (IP Address: 192.168.100.96
 Version: 4
@@ -210,6 +211,8 @@ There are some advanced operations for Network type.
 ### Devide network
 
 ;; Splits target network onto multiple parts
+
+
 user=> (devide-network n1 2)
 (Network: 192.168.100.1/25
 Network address: 192.168.100.0
@@ -240,8 +243,12 @@ Network address: 192.168.100.192
 Broadcast address: 192.168.100.255
 Address count: 64
 )
+```
+### Break network
 
+```clj
 ;; Function breaks target-network( n1) to multiple networks of second argument count( 16)
+
 user=> (break-network n1 16)
 (Network: 192.168.100.1/28
 Network address: 192.168.100.0
