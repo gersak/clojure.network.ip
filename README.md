@@ -142,7 +142,7 @@ Version: 4
 
 clojure.network.ip.Network type mimics clojure.lang.PersistetSet of fixed size. This enables some nice features like:
 
-```
+```clj
 user=> (first n1)
 IP Address: 192.168.100.0
 Version: 4
@@ -210,6 +210,7 @@ There are some advanced operations for Network type.
 
 ### Devide network
 
+```clj
 ;; Splits target network onto multiple parts
 
 
@@ -288,6 +289,7 @@ Network address: 192.168.100.240
 Broadcast address: 192.168.100.255
 Address count: 16
 )
+```
 
 
 ## License
