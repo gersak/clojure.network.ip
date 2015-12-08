@@ -138,7 +138,7 @@
 
 (deftype Network [ip mask]
   IPInfo
-  (ip-address [_] ip)
+  (ip-address [_] (str ip))
   (version [_] (version ip))
   (numeric-value [_] (numeric-value ip))
   NetworkInfo
