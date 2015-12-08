@@ -161,9 +161,11 @@
         (seq [this] (get-all-addresses ip mask))
         clojure.lang.IPersistentSet
         (disjoin [this _] (throw (Exception. "Network can't disjoin IP Addresses.")))
-        (contains [this ip]
-                  (let [value (-> ip make-ip-address numeric-value)]
-                    (and (<= value (numeric-value (get-broadcast-address ip mask))) (>= value (numeric-value (get-network-address ip mask))))))
+        (contains [this test-address]
+                  (let [query-address (-> test-address make-ip-address numeric-value)
+                        max-address (numeric-value (get-broadcast-address ip mask))
+                        min-address (numeric-value (get-network-address ip mask))]
+                    (and (<= query-address max-address) (>= query-address min-address))))
         (get [this address-number]
              (let [target-address (make-ip-address
                                     (.add
@@ -322,7 +324,7 @@
       6 (assert (<= new-mask 128) "Cannot devide network on this much segments."))
     (let [new-network (make-network ip new-mask)
           delta (count new-network)
-          offset (get-position (seq new-network) ip)]
+          offset (get-position (seq new-network) (make-ip-address ip))]
       (map #(make-network (make-ip-address (+ offset (* % delta) (numeric-value network-address))) new-mask) (range parts)))))
 
 
