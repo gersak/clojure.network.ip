@@ -7,7 +7,7 @@ A Clojure/Clojurescript library for IPv4 and IPv6 network and address operations
 Add the following to the `:dependencies` section of your `project.clj` file:
 
 ```clj
-[kovacnica/clojure.network.ip "0.1.0"]
+[![Clojars Project](http://clojars.org/kovacnica/clojure.network.ip/latest-version.svg)](http://clojars.org/kovacnica/clojure.network.ip)
 ```
 
 ## Usage

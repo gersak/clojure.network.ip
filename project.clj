@@ -1,8 +1,8 @@
-(defproject kovacnica/clojure.network.ip "0.1.0"
+(defproject kovacnica/clojure.network.ip "0.1.2-SNAPSHOT"
   :description "Clojure/Clojurescript library for IP address and Network operations."
   :target-path "target/%s/"
   :compile-path "%s/classy-files"
-  :url "http://example.com/FIXME"
+  :url "https://github.com/kovacnica/clojure.networking"
   :source-paths ["src"]
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
