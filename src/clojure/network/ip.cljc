@@ -300,8 +300,8 @@
 (defn- get-position [coll element]
   (first (keep-indexed (fn [i e] (if (= e element) i)) coll)))
 
-(defn devide-network
-  "Given input network, devides network on specified
+(defn divide-network
+  "Given input network, divides network on specified
   parts. If input arg parts is i.e. 2 creates 2 smaller networks
   from input network. If it were 4, than 4 networks would be created.
 
@@ -309,6 +309,7 @@
   parts argument and for v6 IPv6_parts are valid arguments."
   [network parts]
   (assert (not (zero? parts)) "Cannot divide network on 0 parts.")
+  (assert (even? parts) "Network should be divided into even parts. Maybe you know better :)")
   (let [ip (ip-address network)
         network-address (first network)
         delta-mask (case (version network-address)
@@ -320,8 +321,8 @@
                             "Use IPv4: " (clojure.string/join \space IPv4_parts) \newline
                             "Use IPv6: " (clojure.string/join \space IPv6_parts) \newline))
     (case (version network-address)
-      4 (assert (<= new-mask 32) "Cannot devide network on this much segments.")
-      6 (assert (<= new-mask 128) "Cannot devide network on this much segments."))
+      4 (assert (<= new-mask 32) "Cannot divide network on this much segments.")
+      6 (assert (<= new-mask 128) "Cannot divide network on this much segments."))
     (let [new-network (make-network ip new-mask)
           delta (count new-network)
           offset (get-position (seq new-network) (make-ip-address ip))]
@@ -356,7 +357,7 @@
     (assert (< address-count-index mask-index)
             (apply str "Cannot break network on more networks than there are subnets. Use some of:\n"
                    (clojure.string/join \space (possible-break-count? mask (version network)))))
-    (devide-network
+    (divide-network
       network
       (case (version network)
         4 (nth IPv4_parts (- mask-index address-count-index))
