@@ -209,7 +209,7 @@
         IEquiv
         (-equiv [this other]
                 (and
-                  (= (first this) (first other))li
+                  (= (first this) (first other))
                   (= (network-mask this) (network-mask other))))
         clojure.core/IIndexed
         (-nth [this seq-numb] (-nth this seq-numb nil))
@@ -254,7 +254,8 @@
                                                                   all-bits (count (filter true? test!))]
                                                               (if (not= subnet-bits all-bits)
                                                                 (throw
-                                                                  #?(:clj (Exception. (str "Subnet part: " x " is not valid subnet!"))))
+                                                                  #?(:clj (Exception. (str "Subnet part: " x " is not valid subnet!"))
+                                                                     :cljs (js/Error. (str "Subnet part: " x " is not valid subnet!"))))
                                                                 subnet-bits)))
                                              subnet (reduce
                                                       clojure.core/+
@@ -293,40 +294,45 @@
 
 
 ;; NETWORK UTILS
-(def IPv4_parts (take 33 (iterate #(* 2 %) 1)))
-(def IPv6_parts (take 129 (iterate #(* 2 %) 1)))
+(def IPv4_parts (take 15 (iterate (partial * 2) 1)))
+(def IPv6_parts (take 63 (iterate (partial * 2) 1)))
 
 
 (defn- get-position [coll element]
   (first (keep-indexed (fn [i e] (if (= e element) i)) coll)))
 
-(defn divide-network
-  "Given input network, divides network on specified
-  parts. If input arg parts is i.e. 2 creates 2 smaller networks
-  from input network. If it were 4, than 4 networks would be created.
+(let [IPv4_parts (into (sorted-set) IPv4_parts)
+      IPv6_parts (into (sorted-set) IPv6_parts)]
+  (defn divide-network
+    "Given input network, divides network on specified
+    parts. If input arg parts is i.e. 2 creates 2 smaller networks
+    from input network. If it were 4, than 4 networks would be created.
 
-  There are limits. If v4 network is used than IPv4_parts are valid
-  parts argument and for v6 IPv6_parts are valid arguments."
-  [network parts]
-  (assert (not (zero? parts)) "Cannot divide network on 0 parts.")
-  (assert (even? parts) "Network should be divided into even parts. Maybe you know better :)")
-  (let [ip (ip-address network)
-        network-address (first network)
-        delta-mask (case (version network-address)
-                     4 (get-position IPv4_parts parts)
-                     6 (get-position IPv6_parts parts))
-        mask (network-mask network)
-        new-mask (+ mask delta-mask)]
-    (assert delta-mask (str "Wrong part operator: " parts \newline
-                            "Use IPv4: " (clojure.string/join \space IPv4_parts) \newline
-                            "Use IPv6: " (clojure.string/join \space IPv6_parts) \newline))
-    (case (version network-address)
-      4 (assert (<= new-mask 32) "Cannot divide network on this much segments.")
-      6 (assert (<= new-mask 128) "Cannot divide network on this much segments."))
-    (let [new-network (make-network ip new-mask)
-          delta (count new-network)
-          offset (get-position (seq new-network) (make-ip-address ip))]
-      (map #(make-network (make-ip-address (+ offset (* % delta) (numeric-value network-address))) new-mask) (range parts)))))
+    There are limits. If v4 network is used than IPv4_parts are valid
+    parts argument and for v6 IPv6_parts are valid arguments."
+    [network parts]
+    {:pre [(or
+             (IPv4_parts parts)
+             (IPv6_parts parts))]}
+    ; (assert (not (zero? parts)) "Cannot divide network on 0 parts.")
+    ; (assert (even? parts) "Network should be divided into even parts. Maybe you know better :)")
+    (let [ip (ip-address network)
+          network-address (first network)
+          delta-mask (case (version network-address)
+                       4 (get-position IPv4_parts parts)
+                       6 (get-position IPv6_parts parts))
+          mask (network-mask network)
+          new-mask (+ mask delta-mask)]
+      (assert delta-mask (str "Wrong part operator: " parts \newline
+                              "Use IPv4: " (clojure.string/join \space IPv4_parts) \newline
+                              "Use IPv6: " (clojure.string/join \space IPv6_parts) \newline))
+      (case (version network-address)
+        4 (assert (<= new-mask 32) "Cannot divide network on this much segments.")
+        6 (assert (<= new-mask 128) "Cannot divide network on this much segments."))
+      (let [new-network (make-network ip new-mask)
+            delta (count new-network)
+            offset (get-position (seq new-network) (make-ip-address ip))]
+        (map #(make-network (make-ip-address (+ offset (* % delta) (numeric-value network-address))) new-mask) (range parts))))))
 
 
 (defn possible-break-count?
@@ -337,13 +343,16 @@
                      4 (- 32 mask)
                      6 (- 128 mask))]
     (case version
-      4 (take-while (partial not= (nth IPv4_parts mask-index)) IPv4_parts)
-      6 (take-while (partial not= (nth IPv6_parts mask-index)) IPv6_parts))))
+      4 (take-while (partial not= (nth (seq IPv4_parts) mask-index)) IPv4_parts)
+      6 (take-while (partial not= (nth (seq IPv6_parts) mask-index)) IPv6_parts))))
 
 (defn break-network
   "Given input network, breaks current network on
   smaller networks with address count as second argument."
   [network address-count]
+  {:pre [(or
+           ((set IPv4_parts) address-count)
+           ((set IPv6_parts) address-count))]}
   (case (version network)
     4 (assert (get-position IPv4_parts address-count) (apply str "Use: " IPv4_parts))
     6 (assert (get-position IPv6_parts address-count) (apply str "Use: " IPv6_parts)))
