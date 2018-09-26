@@ -293,6 +293,6 @@ Address count: 16
 
 ## License
 
-Copyright © 2015
+Copyright © 2015-2018 Robert Gersak
 
 Distributed under the Eclipse Public License, the same as Clojure.
