@@ -3,7 +3,7 @@
       (:refer-clojure :exclude [more cons]))
   #?(:clj
       (:import
-        [java.math.BigInteger]
+        [java.math BigInteger]
         [clojure.lang ISeq Counted IPersistentSet]
         [java.net InetAddress Inet4Address Inet6Address]
         [java.lang UnsupportedOperationException])
