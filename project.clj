@@ -1,4 +1,4 @@
-(defproject kovacnica/clojure.network.ip "0.1.3-SNAPSHOT"
+(defproject kovacnica/clojure.network.ip "0.1.3"
   :description "Clojure/Clojurescript library for IP address and Network operations."
   :target-path "target/%s/"
   :compile-path "%s/classy-files"
