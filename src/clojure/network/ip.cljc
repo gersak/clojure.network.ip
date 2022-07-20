@@ -22,6 +22,22 @@
 (defprotocol NetworkInfo
   (network-mask [this]))
 
+#?(:clj
+   (defn- to-ip-byte-array [number]
+     (let [number (if (instance? BigInteger number) number (biginteger number))
+           bytes     (seq (.toByteArray number))
+           ;; If there is a sign byte, remove it
+           bytes     (if (= (byte 0) (first bytes))
+                       (rest bytes)
+                       bytes)
+           byte-size (count bytes)
+           should-be (if (<= byte-size 4) 4 16)
+           ;; Fill in the byte array to the required size with empty bytes
+           bytes     (->> bytes
+                      (concat (take (- should-be byte-size) (repeat (byte 0))))
+                      byte-array)]
+       bytes)))
+
 
 #?(:cljs
     (defn- bits->ip [bits]
@@ -80,7 +96,7 @@
     (extend-type BigInteger
         IPConstructor
         (make-ip-address [this]
-          (->IPAddress (.toByteArray this))))
+          (->IPAddress (to-ip-byte-array this))))
    :cljs
     (extend-type goog.math.Integer
       IPConstructor
@@ -91,7 +107,7 @@
     (extend-type clojure.lang.BigInt
       IPConstructor
       (make-ip-address [this]
-        (->IPAddress (.toByteArray (biginteger this)))))
+        (->IPAddress (to-ip-byte-array this))))
    :cljs
     (extend-type number
       IPConstructor
