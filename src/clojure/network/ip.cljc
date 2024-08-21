@@ -8,7 +8,7 @@
         [java.net InetAddress Inet4Address Inet6Address]
         [java.lang UnsupportedOperationException])
     :cljs
-     (:require [goog.net.IpAddress :as ip]
+     (:require [goog.net.ipaddress.IpAddress :as ip]
                [goog.math.Integer :as i])))
 
 (defprotocol IPConstructor
@@ -26,8 +26,8 @@
 #?(:cljs
     (defn- bits->ip [bits]
       (if (= 1 (count bits))
-        (goog.net.Ipv4Address. (goog.math.Integer. bits 0))
-        (goog.net.Ipv6Address. (goog.math.Integer. bits 0)))))
+        (goog.net.ipaddress.Ipv4Address. (goog.math.Integer. bits 0))
+        (goog.net.ipaddress.Ipv6Address. (goog.math.Integer. bits 0)))))
 
 (deftype IPAddress [value]
   IPInfo
